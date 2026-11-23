@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/distributed-job-scheduler.iml" filepath="$PROJECT_DIR$/.idea/distributed-job-scheduler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scheduler-api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/scheduler-api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scheduler-api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/scheduler-api.test.iml" />
     </modules>
   </component>
 </project>

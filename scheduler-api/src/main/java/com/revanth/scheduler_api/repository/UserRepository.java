@@ -1,4 +1,3 @@
-
 package com.revanth.scheduler_api.repository;
 
 import com.revanth.scheduler_api.entity.User;

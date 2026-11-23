@@ -31,7 +31,7 @@ public class UserService {
 
         String apiKey = generateApiKey();
         String apiKeyHash = apiKeyService.hashApiKey(apiKey);
-        User user = new User(request.name(), apiKeyHash);
+        User user = new User(request.getName(), apiKeyHash);
 
         User savedUser = userRepository.save(user);
 

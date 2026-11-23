@@ -11,6 +11,8 @@ services:
       - "3306:3306"
     volumes:
       - mariadb-data:/var/lib/mysql
+      - ../database/01-scheduler.sql:/docker-entrypoint-initdb.d/01-scheduler.sql:ro
+      - ../database/02-mock-receiver.sql:/docker-entrypoint-initdb.d/02-mock-receiver.sql:ro
     mem_limit: 512m
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]

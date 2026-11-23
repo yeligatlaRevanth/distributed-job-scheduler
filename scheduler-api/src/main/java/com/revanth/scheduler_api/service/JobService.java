@@ -3,9 +3,11 @@ package com.revanth.scheduler_api.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revanth.scheduler_api.dto.response.JobCreationResult;
+import com.revanth.scheduler_api.entity.OutboxEvent;
 import com.revanth.scheduler_api.exception.DuplicateJobException;
 import com.revanth.scheduler_api.repository.JobRepository;
 import com.revanth.scheduler_api.repository.UserRepository;
+import com.revanth.scheduler_api.repository.OutboxEventRepository;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.revanth.scheduler_api.dto.request.CreateJobRequest;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.revanth.scheduler_api.dto.response.CreateJobResponse;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 @Service
@@ -23,14 +26,17 @@ public class JobService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final OutboxEventRepository outboxEventRepository;
 
     public JobService(
             JobRepository jobRepository,
             UserRepository userRepository,
+            OutboxEventRepository outboxEventRepository,
             ObjectMapper objectMapper
     ) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.outboxEventRepository = outboxEventRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -96,7 +102,7 @@ public class JobService {
         // 5. Apply default values
         LocalDateTime nextRunAt = request.getScheduledAt() != null
                 ? request.getScheduledAt()
-                : LocalDateTime.now();
+                : LocalDateTime.now(ZoneOffset.UTC);
 
         Short priority = request.getPriority() != null
                 ? request.getPriority()
@@ -123,6 +129,13 @@ public class JobService {
         );
 
         Job savedJob = jobRepository.save(job);
+
+        OutboxEvent outboxEvent = new OutboxEvent(
+                savedJob,
+                nextRunAt
+        );
+
+        outboxEventRepository.save(outboxEvent);
 
         return new JobCreationResult(
                 mapToResponse(savedJob),

@@ -1,6 +1,9 @@
 package com.revanth.scheduler_api.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -64,6 +67,7 @@ public class Job {
     private String lastError;
 
 
+    @Generated(event = EventType.INSERT)
     @Column(
             name = "created_at",
             nullable = false,
@@ -72,6 +76,7 @@ public class Job {
     )
     private LocalDateTime createdAt;
 
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
     @Column(
             name = "updated_at",
             nullable = false,

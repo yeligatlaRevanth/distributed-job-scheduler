@@ -1,11 +1,13 @@
 package com.revanth.scheduler_api.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(
         name = "jobs",
@@ -40,6 +42,9 @@ public class Job {
 
     @Column(nullable = false)
     private Short priority = 5;
+
+    @Column(name = "requested_scheduled_at")
+    private LocalDateTime requestedScheduledAt;
 
     @Column(name = "next_run_at", nullable = false)
     private LocalDateTime nextRunAt;
@@ -98,6 +103,7 @@ public class Job {
             String idempotencyKey,
             String type,
             String payload,
+            LocalDateTime requestedScheduledAt,
             LocalDateTime nextRunAt,
             Short priority,
             Integer maxAttempts,
@@ -108,82 +114,12 @@ public class Job {
         this.type = type;
         this.payload = payload;
         this.status = "PENDING";
+        this.requestedScheduledAt = requestedScheduledAt;
         this.nextRunAt = nextRunAt;
         this.priority = priority;
         this.attemptCount = 0;
         this.maxAttempts = maxAttempts;
         this.timeoutSeconds = timeoutSeconds;
         this.fencingToken = 0L;
-    }
-    public Long getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public String getIdempotencyKey() {
-        return idempotencyKey;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getPayload() {
-        return payload;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public Short getPriority() {
-        return priority;
-    }
-
-    public LocalDateTime getNextRunAt() {
-        return nextRunAt;
-    }
-
-    public Integer getAttemptCount() {
-        return attemptCount;
-    }
-
-    public Integer getMaxAttempts() {
-        return maxAttempts;
-    }
-
-    public Integer getTimeoutSeconds() {
-        return timeoutSeconds;
-    }
-
-    public String getWorkerId() {
-        return workerId;
-    }
-
-    public LocalDateTime getLeaseUntil() {
-        return leaseUntil;
-    }
-
-    public Long getFencingToken() {
-        return fencingToken;
-    }
-
-    public String getLastError() {
-        return lastError;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public LocalDateTime getCompletedAt() {
-        return completedAt;
     }
 }

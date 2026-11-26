@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     payload          LONGTEXT     NULL,
     status           VARCHAR(20)  NOT NULL,
     priority         SMALLINT     NOT NULL DEFAULT 5,
+    requested_scheduled_at DATETIME(3) NULL,
     next_run_at      DATETIME(3)  NOT NULL,
     attempt_count    INT          NOT NULL DEFAULT 0,
     max_attempts     INT          NOT NULL DEFAULT 5,

@@ -17,8 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.revanth.scheduler_api.dto.response.CreateJobResponse;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Optional;
+
 
 @Service
 public class JobService {
@@ -100,9 +104,40 @@ public class JobService {
         User user = userRepository.getReferenceById(userId);
 
         // 5. Apply default values
-        LocalDateTime nextRunAt = request.getScheduledAt() != null
-                ? request.getScheduledAt()
-                : LocalDateTime.now(ZoneOffset.UTC);
+        ZoneId indiaZone = ZoneId.of("Asia/Kolkata");
+        LocalDateTime nextRunAt;
+        if (request.getScheduledAt() != null) {
+            nextRunAt = request.getScheduledAt()
+                    .atZone(indiaZone)
+                    .withZoneSameInstant(ZoneOffset.UTC)
+                    .toLocalDateTime()
+                    .truncatedTo(ChronoUnit.MILLIS);
+        } else {
+            nextRunAt = LocalDateTime.now(ZoneOffset.UTC)
+                    .truncatedTo(ChronoUnit.MILLIS);
+        }
+
+        if (request.getScheduledAt() != null) {
+            LocalDateTime indiaNow = LocalDateTime.now(
+                    ZoneId.of("Asia/Kolkata")
+            );
+
+            if (request.getScheduledAt().isBefore(indiaNow)) {
+                throw new IllegalArgumentException(
+                        "Scheduled time cannot be in the past"
+                );
+            }
+        }
+
+        LocalDateTime requestedScheduledAt = null;
+
+        if (request.getScheduledAt() != null) {
+            requestedScheduledAt = request.getScheduledAt()
+                    .atZone(ZoneId.of("Asia/Kolkata"))
+                    .withZoneSameInstant(ZoneOffset.UTC)
+                    .toLocalDateTime()
+                    .truncatedTo(ChronoUnit.MILLIS);
+        }
 
         Short priority = request.getPriority() != null
                 ? request.getPriority()
@@ -122,11 +157,13 @@ public class JobService {
                 idempotencyKey,
                 request.getType(),
                 payloadJson,
+                requestedScheduledAt,
                 nextRunAt,
                 priority,
                 maxAttempts,
                 timeoutSeconds
         );
+
 
         Job savedJob = jobRepository.save(job);
 
@@ -166,11 +203,20 @@ public class JobService {
             boolean samePayload =
                     existingPayload.equals(request.getPayload());
 
-            boolean sameSchedule =
-                    request.getScheduledAt() == null ||
-                            request.getScheduledAt().equals(
-                                    existingJob.getNextRunAt()
-                            );
+            LocalDateTime requestedScheduledAt = null;
+
+            if (request.getScheduledAt() != null) {
+                requestedScheduledAt = request.getScheduledAt()
+                        .atZone(ZoneId.of("Asia/Kolkata"))
+                        .withZoneSameInstant(ZoneOffset.UTC)
+                        .toLocalDateTime()
+                        .truncatedTo(ChronoUnit.MILLIS);
+            }
+
+            boolean sameSchedule = Objects.equals(
+                    requestedScheduledAt,
+                    existingJob.getRequestedScheduledAt()
+            );
 
             Short priority = request.getPriority() != null
                     ? request.getPriority()
